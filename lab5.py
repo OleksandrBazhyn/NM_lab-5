@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
+import pandas as pd
 
 # Вихідні дані: функція та точки
 x = np.linspace(0, np.pi, 15)  # 15 рівномірно розподілених точок на [0, π]
@@ -53,5 +54,36 @@ plt.tight_layout()
 plt.show()
 
 # Виведення коефіцієнтів сплайна
-coefficients = spline.c  # Коефіцієнти поліномів для кожного сегмента
-print("Коефіцієнти сплайна (для кожного сегмента):\n", coefficients)
+coefficients = spline.c.T  # Коефіцієнти поліномів у правильному порядку
+#print("Коефіцієнти сплайна (для кожного сегмента):\n", coefficients)
+
+# Перевірка значень у точках
+for i in range(len(x)):
+    assert np.isclose(spline(x[i]), y[i])
+
+# Перевірка граничних умов (для природного сплайна)
+assert np.isclose(spline(x[0], 2), 0)
+assert np.isclose(spline(x[-1], 2), 0)
+
+# Обчислення максимальної похибки
+x_test = np.linspace(0, np.pi, 1000)
+y_test = np.sin(x_test)
+y_spline_test = spline(x_test)
+max_error = np.max(np.abs(y_test - y_spline_test))
+print("Максимальна похибка:", max_error)
+
+# Створення списку інтервалів
+intervals = [(x[i], x[i+1]) for i in range(len(x)-1)]
+
+# Створення DataFrame з коефіцієнтами та інтервалами
+data = {
+    'Сегмент': range(1, len(x)),
+    'Інтервал': intervals,
+    'a': coefficients[:, 3],
+    'b': coefficients[:, 2],
+    'c': coefficients[:, 1],
+    'd': coefficients[:, 0]
+}
+
+df = pd.DataFrame(data)
+print(df)
