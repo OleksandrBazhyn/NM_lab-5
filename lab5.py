@@ -1,36 +1,57 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from scipy.interpolate import CubicSpline
 
-# Вхідні дані
+# Вихідні дані: функція та точки
 x = np.linspace(0, np.pi, 15)  # 15 рівномірно розподілених точок на [0, π]
 y = np.sin(x)
 
-n = len(x)
+# Побудова кубічного інтерполяційного сплайна
+spline = CubicSpline(x, y, bc_type='natural')
 
-# Обчислення проміжних значень
-h = np.diff(x)  # Різниці між x
-alpha = np.zeros(n)
-for i in range(1, n-1):
-    alpha[i] = (3/h[i]) * (y[i+1] - y[i]) - (3/h[i-1]) * (y[i] - y[i-1])
+# Точки для побудови графіків
+x_dense = np.linspace(0, np.pi, 500)  # Більше точок для гладких графіків
+y_dense = spline(x_dense)  # Значення сплайна
+dy_dense = spline(x_dense, 1)  # Перша похідна
+d2y_dense = spline(x_dense, 2)  # Друга похідна
 
-# Формування матриці для СЛАР
-A = np.zeros((n, n))
-b = np.zeros(n)
+# Графіки
+plt.figure(figsize=(12, 8))
 
-# Граничні умови для природного сплайна: c''(x_0) = c''(x_n) = 0
-A[0, 0] = 1
-A[n-1, n-1] = 1
-b[0] = 0
-b[n-1] = 0
+# Графік функції та сплайна
+plt.subplot(3, 1, 1)
+plt.plot(x_dense, np.sin(x_dense), label="Початкова функція: sin(x)", color="blue")
+plt.plot(x_dense, y_dense, label="Кубічний сплайн", color="orange", linestyle="--")
+plt.scatter(x, y, color="red", label="Точки значень")
+plt.title("Інтерполяція кубічного сплайну")
+plt.xlabel("x")
+plt.ylabel("y")
+plt.legend()
+plt.grid()
 
-for i in range(1, n-1):
-    A[i, i-1] = h[i-1]
-    A[i, i] = 2 * (h[i-1] + h[i])
-    A[i, i+1] = h[i]
+# Графік першої похідної
+plt.subplot(3, 1, 2)
+plt.plot(x_dense, np.cos(x_dense), label="Перша похідна sin(x): cos(x)", color="green")
+plt.plot(x_dense, dy_dense, label="Перша похідна кубічного сплайну", color="purple", linestyle="--")
+plt.title("Перша похідна")
+plt.xlabel("x")
+plt.ylabel("dy/dx")
+plt.legend()
+plt.grid()
 
-b[1:n-1] = alpha[1:n-1]
+# Графік другої похідної
+plt.subplot(3, 1, 3)
+plt.plot(x_dense, -np.sin(x_dense), label="Друга похідна sin(x): -sin(x)", color="brown")
+plt.plot(x_dense, d2y_dense, label="Друга похідна кубічного сплайну", color="magenta", linestyle="--")
+plt.title("Друга похідна")
+plt.xlabel("x")
+plt.ylabel("d²y/dx²")
+plt.legend()
+plt.grid()
 
-# Розв'язування СЛАР для c
-c = np.linalg.solve(A, b)
+plt.tight_layout()
+plt.show()
 
 # Виведення коефіцієнтів сплайна
-print("Коефіцієнти сплайна (для кожного сегмента):\n", c)
+coefficients = spline.c  # Коефіцієнти поліномів для кожного сегмента
+print("Коефіцієнти сплайна (для кожного сегмента):\n", coefficients)
