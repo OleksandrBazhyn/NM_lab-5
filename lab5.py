@@ -32,7 +32,6 @@ plt.grid()
 
 # Графік першої похідної
 plt.subplot(3, 1, 2)
-plt.plot(x_dense, np.cos(x_dense), label="Перша похідна sin(x): cos(x)", color="green")
 plt.plot(x_dense, dy_dense, label="Перша похідна кубічного сплайну", color="purple", linestyle="--")
 plt.title("Перша похідна")
 plt.xlabel("x")
@@ -42,7 +41,6 @@ plt.grid()
 
 # Графік другої похідної
 plt.subplot(3, 1, 3)
-plt.plot(x_dense, -np.sin(x_dense), label="Друга похідна sin(x): -sin(x)", color="brown")
 plt.plot(x_dense, d2y_dense, label="Друга похідна кубічного сплайну", color="magenta", linestyle="--")
 plt.title("Друга похідна")
 plt.xlabel("x")
